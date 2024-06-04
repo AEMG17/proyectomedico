@@ -1,0 +1,36 @@
+﻿@using Medico.Models
+@using Medico.Services
+@using MudBlazor
+@rendermode InteractiveServer
+
+@inject IMedicamento medicamentoService
+
+
+<div class="card" style="width:75%;margin:auto">
+    <div class="card-header">
+        Medicamentos
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            @foreach (var medicamento in medicamentos)
+            {
+                <li class="list-group-item">
+                    @medicamento.Nombre
+                    <MudBadge Color="Color.Primary" Overlap="true" Content="@medicamento.Stock">
+                        <MudIcon Icon="@Icons.Material.Filled.Inventory" />
+                    </MudBadge>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+
+@code {
+    List<Medicamento> medicamentos = new List<Medicamento>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        medicamentos = await medicamentoService.ListarMedicamentos();
+    }
+}

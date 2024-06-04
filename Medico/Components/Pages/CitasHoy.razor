@@ -1,0 +1,69 @@
+﻿@using Medico.Models
+@using Medico.Services
+@inject ICitas iCitas
+@inject NavigationManager navigation
+
+@rendermode InteractiveServer
+
+
+@if(citas != null && citas.Count > 0)
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Citas de hoy</h5>
+            <ul class="list-group list-group-light">
+                @if (citas != null && citas.Count() > 0)
+                {
+                    @foreach (var cita in citas)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">@cita.Paciente.Nombre @cita.Paciente.PrimerApellido</div>
+                                <div class="text-muted">@cita.Fecha</div>
+                            </div>
+                            @if (cita.Fecha > DateTime.Now)
+                            {
+                                <span class="badge rounded-pill badge-success">Próxima</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill badge-danger">Vencida</span>
+                            }
+                            <div>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Borrar(cita.Id)" aria-label="eliminar"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="() => Modificar(cita.Id)" aria-label="editar"></MudIconButton>
+                            </div>
+                        </li>
+                    }
+                }               
+            </ul>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading ...</p>
+}
+
+
+@code {
+    [Parameter]
+    public List<Cita> citas { get; set; } = new List<Cita>();
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     citas = await iCitas.ObtenerCitasHoy();
+    // }
+
+    async void Borrar(int id)
+    {
+        await iCitas.BorrarCita(id);
+        citas = await iCitas.ObtenerCitasHoy();
+        StateHasChanged();
+    }
+
+    async void Modificar(int id)
+    {
+        navigation.NavigateTo($"/modificar/{id}");
+    }
+}

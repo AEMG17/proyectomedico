@@ -1,0 +1,56 @@
+﻿@using Medico.Models
+@using Medico.Services
+@using MudBlazor
+@rendermode InteractiveServer
+@inject IPaciente pacienteService
+
+<div class="card" style="width:75%;margin:auto">
+    <div class="card-header">
+        Pacientes
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            @foreach (var paciente in pacientes)
+            {
+                string dia = paciente.CURP.Substring(8, 2);
+                string mes = paciente.CURP.Substring(6, 2);
+                string yearString = paciente.CURP.Substring(4, 2);
+
+                int year = int.Parse(yearString);
+                if (year >= 0 && year <= 99) // Ajustar para CURPs antiguas
+                    year += year <= 23 ? 2000 : 1900;
+
+                DateOnly fechaNacimiento = new DateOnly(year, int.Parse(mes), int.Parse(dia));
+
+                <li class="list-group-item">
+                    @paciente.Nombre @paciente.PrimerApellido @paciente.SegundoApellido
+                    <span class="badge text-bg-secondary rounded-pill">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-1" />
+                        @CalcularEdad(fechaNacimiento) años
+                    </span>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+
+@code {
+    List<Paciente> pacientes = new List<Paciente>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        pacientes = await pacienteService.ListarPacientes();
+    }
+
+    private int CalcularEdad(DateOnly fechaNacimiento)
+    {
+        DateOnly fechaActual = DateOnly.FromDateTime(DateTime.Today);
+        int edad = fechaActual.Year - fechaNacimiento.Year;
+
+        if (fechaNacimiento.Month > fechaActual.Month || (fechaNacimiento.Month == fechaActual.Month && fechaNacimiento.Day > fechaActual.Day))
+            edad--;
+
+        return edad;
+    }
+}
